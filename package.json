@@ -1,0 +1,46 @@
+{
+  "name": "@robdel12/cricket-super-admin",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared admin modules and a product extension shell for Cricket apps.",
+  "packageManager": "pnpm@11.3.0",
+  "exports": {
+    ".": "./src/index.js",
+    "./react": "./src/react/index.jsx",
+    "./modules": "./src/modules.js",
+    "./styles.css": "./src/react/styles.css"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "check": "node --check src/index.js && node --check src/schema.js && node --check src/routes.js && node --check src/modules.js"
+  },
+  "peerDependencies": {
+    "@robdel12/cricket": ">=0.1.0",
+    "react": ">=18"
+  },
+  "dependencies": {
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@robdel12/cricket": "github:Robdel12/cricket#f6f748d33e4725528497ebdca1ed2bd6f160403c",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/Robdel12/cricket-super-admin.git"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}
