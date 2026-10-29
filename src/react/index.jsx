@@ -1,9 +1,11 @@
 import React, {
   useEffect,
+  useId,
   useState
 } from 'react';
 import { adminPages, adminHref } from '../modules.js';
 import { resolveAdminFeatures } from '../features.js';
+import { OverviewSection } from './overview.jsx';
 
 function errorText(error, fallback) {
   return error instanceof Error && error.message
@@ -84,73 +86,6 @@ export function ActivityList({ items }) {
         </li>
       ))}
     </ol>
-  );
-}
-
-function OverviewSection({ overview, status, error, onRetry, onShowActivity }) {
-  if (status === 'loading' && !overview)
-    return <p className="sa-loading" role="status">Loading the product overview…</p>;
-
-  if (status === 'error' && !overview)
-    return <ErrorNotice onRetry={onRetry}>{error}</ErrorNotice>;
-
-  if (!overview)
-    return null;
-
-  return (
-    <div className="sa-section">
-      <div className="sa-metrics">
-        {overview.metrics.map(metric => {
-          let body = (
-            <>
-              <span className="sa-metric-label">{metric.label}</span>
-              <strong>{metric.value}</strong>
-              <span className="sa-metric-detail">{metric.detail}</span>
-            </>
-          );
-
-          return metric.href ? (
-            <a className="sa-metric" href={metric.href} key={metric.id}>
-              {body}
-            </a>
-          ) : (
-            <article className="sa-metric" key={metric.id}>{body}</article>
-          );
-        })}
-      </div>
-
-      <div className="sa-overview-grid">
-        <section className="sa-panel" aria-labelledby="sa-role-counts-title">
-          <SectionHeading
-            title="Accounts by role"
-            detail="Access across this product."
-          />
-          {overview.roles.length ? (
-            <ul className="sa-role-list" id="sa-role-counts-title">
-              {overview.roles.map(role => (
-                <li key={role.value}>
-                  <span>{role.label}</span>
-                  <strong>{role.count}</strong>
-                </li>
-              ))}
-            </ul>
-          ) : <p className="sa-empty">This product does not use role counts.</p>}
-        </section>
-
-        <section className="sa-panel">
-          <SectionHeading
-            title="Recent admin activity"
-            detail="Changes made through the super admin."
-            action={onShowActivity && (
-              <button className="sa-button sa-button-subtle" type="button" onClick={onShowActivity}>
-                View activity
-              </button>
-            )}
-          />
-          <ActivityList items={overview.recentActivity} />
-        </section>
-      </div>
-    </div>
   );
 }
 
@@ -738,6 +673,8 @@ export function ResourceState({ resource, children }) {
 }
 
 export function SuperAdminShell({ product, modules, activePageId, permissions = [], basePath, Link = DefaultLink, children }) {
+  let [navigationOpen, setNavigationOpen] = useState(false);
+  let navigationId = useId();
   let pages = adminPages(modules, permissions);
   let active = pages.find(page => page.id === activePageId);
   let selected = active?.navigation ? active : pages.find(page => page.moduleId === active?.moduleId && page.navigation);
@@ -745,14 +682,21 @@ export function SuperAdminShell({ product, modules, activePageId, permissions = 
   return (
     <div className="super-admin-root sa-shell">
       <aside className="sa-sidebar">
-        <p className="sa-product">{product.name} <span>{product.environment}</span></p>
-        <nav aria-label="Super admin sections">
+        <div className="sa-sidebar-heading">
+          <p className="sa-product">{product.name}<span>{product.environment}</span></p>
+          <button className="sa-button sa-menu-toggle" type="button" aria-expanded={navigationOpen}
+            aria-controls={navigationId} onClick={() => setNavigationOpen(open => !open)}>
+            {navigationOpen ? 'Close menu' : 'Admin menu'}
+          </button>
+        </div>
+        <nav id={navigationId} className={navigationOpen ? 'sa-navigation sa-navigation-open' : 'sa-navigation'} aria-label="Super admin sections">
           {groups.map(group => {
             let entries = modules.filter(module => module.group === group)
               .flatMap(module => pages.filter(page => page.moduleId === module.id && page.navigation));
             return entries.length > 0 && <section key={group}>
-              <h2>{group}</h2>
+              {entries.length > 1 && <h2>{group}</h2>}
               {entries.map(page => <Link key={page.id} href={adminHref(basePath, page.path)}
+                onClick={() => setNavigationOpen(false)}
                 className={selected?.id === page.id ? 'sa-nav-link sa-nav-active' : 'sa-nav-link'}
                 aria-current={selected?.id === page.id ? 'page' : undefined}>{page.label}</Link>)}
             </section>;
@@ -774,12 +718,17 @@ export function createSuperAdminModules({ features, api }) {
     modules.push({ id, label, group, pages: [{ id: 'index', path: id === 'overview' ? '/' : '/' + id, label, Component }, ...extraPages] });
   }
   if (enabled.includes('overview')) {
-    function OverviewPage({ navigate }) {
-      let resource = useAdminResource(api.getOverview);
-      return <ResourceState resource={resource}>{overview => <OverviewSection overview={overview} status="ready"
-        onShowActivity={enabled.includes('activity') ? () => navigate('/activity') : undefined} />}</ResourceState>;
+    function OverviewPage({ search, onSearch, navigate }) {
+      let requested = Number(new URLSearchParams(search).get('days'));
+      let days = [7, 30, 90].includes(requested) ? requested : 30;
+      let resource = useAdminResource(api.getOverview, days);
+      return <ResourceState resource={resource}>{overview => <OverviewSection overview={overview}
+        days={days} onPeriodChange={value => onSearch({ days: value })} onRefresh={resource.reload}
+        onShowOperations={enabled.includes('operations') ? () => navigate('/operations') : undefined}
+        onShowActivity={enabled.includes('activity') ? () => navigate('/activity') : undefined}
+        ActivityList={ActivityList} />}</ResourceState>;
     }
-    add('overview', 'Super admin', 'Overview', OverviewPage);
+    add('overview', 'Overview', 'Overview', OverviewPage);
   }
   if (enabled.includes('accounts')) {
     function AccountsPage(props) {

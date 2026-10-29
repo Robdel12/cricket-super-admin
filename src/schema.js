@@ -23,7 +23,8 @@ export let SuperAdminMetricSchema = z.object({
   label: z.string().min(1),
   value: z.union([z.string(), z.number()]),
   detail: z.string().nullable(),
-  href: z.string().nullable()
+  href: z.string().nullable(),
+  comparison: z.object({ previousValue: z.number(), label: z.string().min(1) }).optional()
 });
 
 export let SuperAdminRoleOptionSchema = z.object({
@@ -135,13 +136,32 @@ export let SuperAdminTelemetryPageSchema = z.object({
   total: z.number().int().min(0)
 });
 
+export let SuperAdminOverviewQuerySchema = z.object({
+  days: z.coerce.number().pipe(z.union([z.literal(7), z.literal(30), z.literal(90)])).default(30)
+});
+
+export let SuperAdminTrendSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1),
+  detail: z.string().nullable(),
+  points: z.array(z.object({ date: z.iso.date(), value: z.number().min(0) }))
+});
+
 export let SuperAdminOverviewSchema = z.object({
   product: SuperAdminProductSchema,
   metrics: z.array(SuperAdminMetricSchema),
+  metricGroups: z.array(z.object({
+    id: z.string().min(1), title: z.string().min(1), detail: z.string().nullable(),
+    metrics: z.array(SuperAdminMetricSchema)
+  })).default([]),
+  trends: z.array(SuperAdminTrendSchema).default([]),
+  health: z.array(SuperAdminServiceStatusSchema).default([]),
+  period: z.object({
+    days: z.number(), from: z.iso.datetime(), to: z.iso.datetime()
+  }).optional(),
   roles: z.array(SuperAdminRoleCountSchema),
   roleOptions: z.array(SuperAdminRoleOptionSchema),
   recentActivity: z.array(SuperAdminActivitySchema)
-
 });
 
 export let SuperAdminAccountPageSchema = z.object({
@@ -224,7 +244,7 @@ let contracts = {
         output: z.boolean()
       },
       getOverview: {
-        input: z.object({ actor: SuperAdminActorSchema }),
+        input: SuperAdminOverviewQuerySchema.extend({ actor: SuperAdminActorSchema }),
         output: SuperAdminOverviewSchema
       },
       searchAccounts: {

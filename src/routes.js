@@ -12,6 +12,7 @@ import {
   SuperAdminImpersonationBodySchema,
   SuperAdminImpersonationResultSchema,
   SuperAdminOverviewSchema,
+  SuperAdminOverviewQuerySchema,
   SuperAdminOperationsSchema,
   SuperAdminPaginationSchema,
   SuperAdminTelemetryPageSchema,
@@ -34,13 +35,14 @@ overview: [
   defineEndpoint({
     method: 'get',
     path: '/super-admin/overview',
-    summary: 'Get the super admin overview',
+    summary: 'Get product growth, usage and health',
+    query: SuperAdminOverviewQuerySchema,
     tags: ['Super Admin'],
     response: { schema: SuperAdminOverviewSchema },
     responses: accessResponses,
     beforeBodyRules: adminRules,
-    async handler({ services, superAdminActor }) {
-      return ok(await services.superAdmin.getOverview({ actor: superAdminActor }));
+    async handler({ input, services, superAdminActor }) {
+      return ok(await services.superAdmin.getOverview({ ...input.query, actor: superAdminActor }));
     }
   })
 ],

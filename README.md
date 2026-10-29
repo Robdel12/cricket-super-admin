@@ -59,6 +59,11 @@ your app decides which actions are allowed.
 reuse the exported `requireSuperAdmin` rule. Mutations should check access
 inside their transaction and save an audit record with the change.
 
+The overview accepts `?days=7`, `30` or `90` (default: `30`). Its adapter receives
+`{ actor, days }`. Optional `metricGroups`, `trends`, `health` and `period` fields
+add usage summaries, daily charts and app-reported checks. Metrics can include
+`comparison: { previousValue, label }`. Each app defines what its numbers mean.
+
 Telemetry needs your app's log or trace provider. Impersonation needs your app's
 support sessions, including expiry, audit records and a visible way to exit.
 Enable these features when those integrations are ready.
@@ -95,6 +100,10 @@ Mount `adminPages(modules, permissions)` with your router. Render the matched pa
 inside `SuperAdminShell`, passing `product: { name, environment }`, `modules`,
 `activePageId`, `permissions`, `basePath` and your router's `Link` component.
 Page paths are relative to `basePath`; the shell does not create a router.
+
+The overview client implements `getOverview(days, { signal })`. Keep the period
+in the URL; Refresh fetches a new snapshot. Chart points use `{ date, value }`
+with UTC dates. The chart also provides a table of daily counts.
 
 Shared pages receive `product`, `params`, `search`, `onSearch`, `href`, `navigate`
 and `Link`. Keep `search` in the URL and update it through `onSearch(values)`.

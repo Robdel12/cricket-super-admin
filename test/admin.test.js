@@ -77,3 +77,34 @@ test('selected adapter methods are required and their results are schema checked
     assert.ok(!JSON.stringify(response.body).includes('must not escape'));
   } finally { await harness.cleanup(); }
 });
+
+
+test('overview validates reporting periods and preserves product metric groups and daily trends', async () => {
+  let app = defineCricketApp({
+    domains: [], plugins: [createSuperAdminPlugin({ features: ['overview'] })],
+    context: () => ({ user: { id: 'owner', role: 'admin' } }),
+    services: () => ({ superAdmin: {
+      canAccess: () => true,
+      getOverview: ({ days }) => ({
+        product: { id: 'example', name: 'Example', environment: 'test' },
+        metrics: [{ id: 'signups', label: 'Signups', value: 0, detail: 'Current period', href: null,
+          comparison: { previousValue: 4, label: 'Previous period' } }],
+        metricGroups: [{ id: 'usage', title: 'Usage', detail: null, metrics: [] }],
+        trends: [{ id: 'signups', title: 'Signups', detail: null, points: [{ date: '2026-01-01', value: 0 }] }],
+        health: [], roles: [], roleOptions: [], recentActivity: [],
+        period: { days, from: '2026-01-01T00:00:00.000Z', to: '2026-02-01T00:00:00.000Z' }
+      })
+    } })
+  });
+  let harness = await createTestRuntime(app);
+  try {
+    let response = await harness.api.get('/super-admin/overview?days=7');
+    assert.equal(response.status, 200);
+    assert.equal(response.body.period.days, 7);
+    assert.equal(response.body.metrics[0].comparison.previousValue, 4);
+    assert.equal(response.body.trends[0].points[0].value, 0);
+    assert.equal(response.body.metricGroups[0].id, 'usage');
+    assert.equal((await harness.api.get('/super-admin/overview')).body.period.days, 30);
+    assert.equal((await harness.api.get('/super-admin/overview?days=14')).status, 422);
+  } finally { await harness.cleanup(); }
+});

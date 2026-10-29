@@ -12,8 +12,9 @@ inside each app and uses that app's authentication.
 
 ## What belongs here
 
-Reusable account screens, admin activity, app-reported operations, navigation
-and UI helpers belong in the package. Add a shared feature when apps can agree
+Growth and usage summaries, account screens, admin activity, app-reported
+operations, navigation and UI helpers belong in the package. Metrics need a
+clear time window and source; missing analytics should stay unavailable. Add a shared feature when apps can agree
 on its data and behavior. Keep specialized workflows in product pages.
 
 The app owns table design, data access, permissions, audit storage, migrations,
