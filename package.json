@@ -23,7 +23,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@robdel12/cricket": "github:Robdel12/cricket#f6f748d33e4725528497ebdca1ed2bd6f160403c",
+    "@robdel12/cricket": "github:Robdel12/cricket#6dc0df1927016e7646907b9b00753b7201edddca",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

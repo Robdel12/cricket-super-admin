@@ -13,8 +13,8 @@ importers:
         version: 4.6.7
     devDependencies:
       '@robdel12/cricket':
-        specifier: github:Robdel12/cricket#f6f748d33e4725528497ebdca1ed2bd6f160403c
-        version: https://codeload.github.com/Robdel12/cricket/tar.gz/f6f748d33e4725528497ebdca1ed2bd6f160403c
+        specifier: github:Robdel12/cricket#6dc0df1927016e7646907b9b00753b7201edddca
+        version: https://codeload.github.com/Robdel12/cricket/tar.gz/6dc0df1927016e7646907b9b00753b7201edddca
       react:
         specifier: ^19.2.0
         version: 19.3.1
@@ -24,8 +24,8 @@ importers:
 
 packages:
 
-  '@robdel12/cricket@https://codeload.github.com/Robdel12/cricket/tar.gz/f6f748d33e4725528497ebdca1ed2bd6f160403c':
-    resolution: {gitHosted: true, tarball: https://codeload.github.com/Robdel12/cricket/tar.gz/f6f748d33e4725528497ebdca1ed2bd6f160403c}
+  '@robdel12/cricket@https://codeload.github.com/Robdel12/cricket/tar.gz/6dc0df1927016e7646907b9b00753b7201edddca':
+    resolution: {gitHosted: true, tarball: https://codeload.github.com/Robdel12/cricket/tar.gz/6dc0df1927016e7646907b9b00753b7201edddca}
     version: 0.1.0
     engines: {node: '>=24'}
     hasBin: true
@@ -184,7 +184,7 @@ packages:
 
 snapshots:
 
-  '@robdel12/cricket@https://codeload.github.com/Robdel12/cricket/tar.gz/f6f748d33e4725528497ebdca1ed2bd6f160403c':
+  '@robdel12/cricket@https://codeload.github.com/Robdel12/cricket/tar.gz/6dc0df1927016e7646907b9b00753b7201edddca':
     dependencies:
       busboy: 1.6.0
       cron-parser: 5.10.2
